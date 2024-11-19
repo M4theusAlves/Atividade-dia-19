@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  Alert,
+  ImageBackground,
+} from "react-native";
 import axios from "axios";
 
 export default function App() {
@@ -8,8 +16,8 @@ export default function App() {
   const [ClimaData, setClimaData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const API_KEY = "b9b7b46eec97d3507cc8d26faea633b2"; 
-  
+  const API_KEY = "b9b7b46eec97d3507cc8d26faea633b2";
+
   const latRef = useRef(null);
   const longRef = useRef(null);
 
@@ -43,52 +51,78 @@ export default function App() {
     };
   }, [ClimaData]);
 
+  const getBackgroundImage = () => {
+    if (!formattedClima) return null;
+
+    const temp = formattedClima.temperature;
+    if (temp <= 10) {
+      return require("./assets/ice.jpg"); 
+    } else if (temp <= 20) {
+      return require("./assets/sol.jpg"); 
+    } else {
+      return require("./assets/fogo.jpg"); 
+    }
+  };
+
   useEffect(() => {
     latRef.current?.focus();
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Qual Meu Clima?</Text>
-      <TextInput
-        ref={latRef}
-        style={styles.input}
-        placeholder="Latitude"
-        keyboardType="numeric"
-        value={lat}
-        onChangeText={(text) => setLat(text)}
-      />
-      <TextInput
-        ref={longRef}
-        style={styles.input}
-        placeholder="Longitude"
-        keyboardType="numeric"
-        value={long}
-        onChangeText={(text) => setLong(text)}
-      />
-      <Button
-        title={loading ? "Carregando..." : "Buscar Clima"}
-        onPress={handleFetchWeather}
-        disabled={loading}
-      />
-      {formattedClima && (
-        <View style={styles.ClimaInfo}>
-          <Text style={styles.infoText}>Temperatura: {formattedClima.temperature}°C</Text>
-          <Text style={styles.infoText}>Umidade: {formattedClima.humidity}%</Text>
-          <Text style={styles.infoText}>Descrição: {formattedClima.description}</Text>
-        </View>
-      )}
-    </View>
+    <ImageBackground
+      source={getBackgroundImage()}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <Text style={styles.title}>Qual Meu Clima?</Text>
+        <TextInput
+          ref={latRef}
+          style={styles.input}
+          placeholder="Latitude"
+          keyboardType="numeric"
+          value={lat}
+          onChangeText={(text) => setLat(text)}
+        />
+        <TextInput
+          ref={longRef}
+          style={styles.input}
+          placeholder="Longitude"
+          keyboardType="numeric"
+          value={long}
+          onChangeText={(text) => setLong(text)}
+        />
+        <Button
+          title={loading ? "Carregando..." : "Buscar Clima"}
+          onPress={handleFetchWeather}
+          disabled={loading}
+        />
+        {formattedClima && (
+          <View style={styles.ClimaInfo}>
+            <Text style={styles.infoText}>
+              Temperatura: {formattedClima.temperature}°C
+            </Text>
+            <Text style={styles.infoText}>Umidade: {formattedClima.humidity}%</Text>
+            <Text style={styles.infoText}>
+              Descrição: {formattedClima.description}
+            </Text>
+          </View>
+        )}
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "rgba(255, 255, 255, 0.8)", 
   },
   title: {
     fontSize: 24,
@@ -103,6 +137,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 10,
     marginBottom: 10,
+    backgroundColor: "#fff",
   },
   ClimaInfo: {
     marginTop: 20,
